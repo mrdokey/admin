@@ -10,33 +10,85 @@
     <style>
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 80px; }
         .content-area { padding: 20px; }
-        .unit-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; }
+        .unit-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .unit-card:active { transform: scale(0.97); background: #f8f9fa; }
         .unit-img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 15px; background: #f0f0f0; }
         .unit-info { flex-grow: 1; }
         .unit-name { font-weight: 700; color: #566a7f; margin: 0; font-size: 0.9rem; }
+        
         .group-header { border-left: 4px solid #696cff; background: rgba(105, 108, 255, 0.05); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 25px; margin-bottom: 10px; }
         .status-available { background: #e8fadf; color: #71dd37; }
         .status-rent { background: #ffe5e5; color: #ff3e1d; }
         .status-booked { background: #fff2e2; color: #fdac41; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e7e7ff; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .detail-img-large { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="small fw-bold">Memuat Armada...</p></div>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="small fw-bold text-center">Sinkronisasi Armada...</p></div>
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0">Daftar Armada</h4>
-            <button class="btn btn-sm btn-light border" onclick="loadUnits()"><i class="fas fa-sync"></i></button>
+            <h4 class="fw-bold mb-0 text-dark">Daftar Armada</h4>
+            <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="loadUnits()"><i class="fas fa-sync me-1"></i> Refresh</button>
         </div>
         
-        <input type="text" id="search" class="form-control mb-2 rounded-pill border-0 shadow-sm px-3" placeholder="Cari unit, tipe, atau brand..." onkeyup="filterUnit()">
+        <input type="text" id="search" class="form-control mb-2 rounded-pill border-0 shadow-sm px-3 py-2" placeholder="Cari unit, tipe, atau brand..." onkeyup="filterUnit()">
         
         <div id="unit-list"></div>
+    </div>
+
+    <div class="modal fade" id="modalDetail" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered p-3">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0">Informasi Unit</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <div id="detailView">
+                        <img id="det-img" src="" class="detail-img-large shadow-sm">
+                        <div class="card bg-light border-0 p-3 mb-3">
+                            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">No. Plat</span><span class="fw-bold text-dark" id="det-plat">-</span></div>
+                            <div class="d-flex justify-content-between mb-1"><span class="small text-muted">Brand/Tipe</span><span class="fw-bold text-dark" id="det-tipe">-</span></div>
+                            <div class="d-flex justify-content-between"><span class="small text-muted">Status</span><span id="det-status-badge" class="badge rounded-pill">-</span></div>
+                        </div>
+                        <button class="btn btn-outline-primary w-100 fw-bold py-2 rounded-pill mb-3" onclick="toggleEdit(true)">
+                            <i class="fas fa-edit me-1"></i> Edit Unit Ini
+                        </button>
+                    </div>
+
+                    <div id="editView" style="display:none;">
+                        <form id="formEdit">
+                            <input type="hidden" id="edit-plat">
+                            <div class="mb-3">
+                                <label class="small fw-bold text-muted mb-1">GANTI STATUS</label>
+                                <select class="form-select border-0 bg-light" id="edit-status">
+                                    <option value="Available">Available</option>
+                                    <option value="Rent">Rent</option>
+                                    <option value="Booked">Booked</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small fw-bold text-muted mb-1">HARGA SEWA HARIAN</label>
+                                <input type="number" class="form-control border-0 bg-light" id="edit-harga">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-light w-100 fw-bold py-2 rounded-pill" onclick="toggleEdit(false)">Batal</button>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="bottom-nav">
@@ -46,13 +98,16 @@
         <a href="#" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const webAppUrl = "https://script.google.com/macros/s/AKfycbwdmzb73BiGP7NualXFfyZcn75MNektvXzGm-tOFL3A7eZE-kWO7E4HRMOnOdI-ElyjTg/exec";
         const userEmail = localStorage.getItem('ams_user_email');
         let masterUnits = [];
+        let modalInstance;
 
         window.onload = function() {
             if (!userEmail) { window.location.href = "index.html"; return; }
+            modalInstance = new bootstrap.Modal(document.getElementById('modalDetail'));
             loadUnits();
         };
 
@@ -84,8 +139,8 @@
                         </div>`;
 
                     data.forEach(u => {
-                        html += `<div class="unit-card">
-                            <img src="${u.foto_link}" class="unit-img" loading="lazy" onerror="this.src='https://via.placeholder.com/80'">
+                        html += `<div class="unit-card" onclick="openDetail('${u.no_motor}')">
+                            <img src="${u.foto_link}" class="unit-img" onerror="this.src='https://via.placeholder.com/80'">
                             <div class="unit-info">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <p class="unit-name">${u.no_motor}</p>
@@ -101,11 +156,62 @@
             document.getElementById('unit-list').innerHTML = html || '<p class="text-center mt-5">Belum ada data armada.</p>';
         }
 
+        function openDetail(noMotor) {
+            const unit = masterUnits.find(u => u.no_motor === noMotor);
+            if (!unit) return;
+
+            // Isi Detail View
+            document.getElementById('det-img').src = unit.foto_link || 'https://via.placeholder.com/150';
+            document.getElementById('det-plat').innerText = unit.no_motor;
+            document.getElementById('det-tipe').innerText = `${unit.brand} ${unit.tipe}`;
+            
+            const badge = document.getElementById('det-status-badge');
+            badge.innerText = unit.status;
+            badge.className = `badge rounded-pill ${unit.status === 'Available' ? 'status-available' : (unit.status === 'Rent' ? 'status-rent' : 'status-booked')}`;
+
+            // Isi Edit Form (Hidden)
+            document.getElementById('edit-plat').value = unit.no_motor;
+            document.getElementById('edit-status').value = unit.status;
+            document.getElementById('edit-harga').value = unit.harga;
+
+            toggleEdit(false);
+            modalInstance.show();
+        }
+
+        function toggleEdit(isEdit) {
+            document.getElementById('detailView').style.display = isEdit ? 'none' : 'block';
+            document.getElementById('editView').style.display = isEdit ? 'block' : 'none';
+        }
+
         function filterUnit() {
             let q = document.getElementById('search').value.toLowerCase();
             let filtered = masterUnits.filter(u => u.no_motor.toLowerCase().includes(q) || u.tipe.toLowerCase().includes(q) || u.brand.toLowerCase().includes(q));
             renderUnits(filtered);
         }
+
+        // Script untuk handle POST edit (Pastikan GAS kamu support action ini)
+        document.getElementById('formEdit').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            const payload = {
+                action: "update_item", // Kamu perlu tambahkan logika update_item di .gs
+                email: userEmail,
+                no_motor: document.getElementById('edit-plat').value,
+                status: document.getElementById('edit-status').value,
+                harga: document.getElementById('edit-harga').value
+            };
+
+            fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
+            .then(() => {
+                modalInstance.hide();
+                loadUnits();
+            })
+            .catch(err => {
+                alert("Gagal simpan!");
+                document.getElementById('loading-overlay').style.display = 'none';
+            });
+        };
     </script>
 </body>
 </html>
