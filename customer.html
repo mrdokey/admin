@@ -10,37 +10,30 @@
     <style>
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
         .content-area { padding: 20px; }
-        /* Card Klik-able */
         .customer-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
         .customer-card:active { transform: scale(0.98); background: #f8f9fa; }
-        
         .cust-icon { width: 45px; height: 45px; background: rgba(105, 108, 255, 0.1); color: #696cff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
         .cust-info { flex-grow: 1; }
         .btn-wa { background-color: #25D366; color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 5; }
-        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
-        
         .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #696cff; color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
-        
         .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 4px; text-transform: uppercase; }
         .form-control { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Sinkronisasi...</p></div>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Menyimpan Data...</p></div>
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0 text-dark">Data Customer</h4>
             <button class="btn btn-sm btn-light border rounded-pill" onclick="loadCustomers()"><i class="fas fa-sync text-primary"></i></button>
         </div>
-        
         <input type="text" id="searchCust" class="form-control mb-3 shadow-sm border-0" placeholder="Cari nama atau nomor..." onkeyup="filterCustomer()" style="background:#fff; padding:12px;">
-
         <div id="customer-list"></div>
     </div>
 
@@ -53,7 +46,8 @@
                     <h5 class="fw-bold text-dark mb-4" id="modalTitle">Tambah Customer</h5>
                     <form id="formCustomer">
                         <input type="hidden" id="is_edit_mode" value="false">
-                        <input type="hidden" id="old_wa"> <div class="mb-3">
+                        <input type="hidden" id="old_wa"> 
+                        <div class="mb-3">
                             <label class="form-label">Nama Lengkap</label>
                             <input type="text" class="form-control" id="c_nama" placeholder="Sesuai KTP" required>
                         </div>
@@ -102,13 +96,17 @@
                 masterCustomers = data.customers || [];
                 renderCustomers(masterCustomers);
                 document.getElementById('loading-overlay').style.display = 'none';
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('loading-overlay').style.display = 'none';
             });
         }
 
         function renderCustomers(data) {
             let html = "";
             data.forEach(c => {
-                const cleanWA = c.no_wa.toString().replace(/\D/g, '');
+                const cleanWA = c.no_wa ? c.no_wa.toString().replace(/\D/g, '') : '';
                 html += `
                 <div class="customer-card" onclick="openForm('${c.no_wa}')">
                     <div class="cust-icon"><i class="fas fa-user"></i></div>
@@ -122,22 +120,25 @@
                     </a>
                 </div>`;
             });
-            document.getElementById('customer-list').innerHTML = html || '<p class="text-center mt-5">Belum ada customer.</p>';
+            document.getElementById('customer-list').innerHTML = html || '<p class="text-center mt-5 text-muted">Belum ada customer.</p>';
         }
 
         function openForm(waKey) {
             document.getElementById('formCustomer').reset();
-            if (waKey) {
+            if (waKey && waKey !== 'null') {
                 const c = masterCustomers.find(item => item.no_wa == waKey);
-                document.getElementById('modalTitle').innerText = "Edit Customer";
-                document.getElementById('is_edit_mode').value = "true";
-                document.getElementById('old_wa').value = c.no_wa;
-                document.getElementById('c_nama').value = c.nama;
-                document.getElementById('c_wa').value = c.no_wa;
-                document.getElementById('c_alamat').value = c.alamat_antar;
+                if(c) {
+                    document.getElementById('modalTitle').innerText = "Edit Customer";
+                    document.getElementById('is_edit_mode').value = "true";
+                    document.getElementById('old_wa').value = c.no_wa;
+                    document.getElementById('c_nama').value = c.nama;
+                    document.getElementById('c_wa').value = c.no_wa;
+                    document.getElementById('c_alamat').value = c.alamat_antar || '';
+                }
             } else {
                 document.getElementById('modalTitle').innerText = "Tambah Customer";
                 document.getElementById('is_edit_mode').value = "false";
+                document.getElementById('old_wa').value = "";
             }
             modalCtrl.show();
         }
@@ -157,11 +158,25 @@
             };
 
             fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
+            .then(r => r.json())
             .then(() => {
                 modalCtrl.hide();
                 loadCustomers();
+            })
+            .catch(err => {
+                alert("Simpan gagal: " + err);
+                document.getElementById('loading-overlay').style.display = 'none';
             });
         };
 
         function filterCustomer() {
-            let q = document.getElementById('
+            let q = document.getElementById('searchCust').value.toLowerCase();
+            const filtered = masterCustomers.filter(c => 
+                (c.nama && c.nama.toLowerCase().includes(q)) || 
+                (c.no_wa && c.no_wa.toString().includes(q))
+            );
+            renderCustomers(filtered);
+        }
+    </script>
+</body>
+</html>
