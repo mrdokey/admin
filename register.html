@@ -3,52 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMS RIDE | Register Full Table</title>
+    <title>AMS RIDE | Register Data</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #696cff; --secondary: #8592a3; --success: #71dd37; --danger: #ff3e1d; --warning: #fdac41; }
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
-        
         .content-area { padding: 15px; }
         
-        /* Table Container dengan Horizontal Scroll */
-        .table-container { 
-            background: #fff; 
-            border-radius: 12px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            overflow-x: auto; /* Biar bisa scroll ke kanan */
-        }
+        /* Table Container Full Data */
+        .table-container { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
+        .table { min-width: 1500px; margin-bottom: 0; font-size: 0.8rem; }
+        .table thead { background-color: #f8f9fa; }
+        .table th { font-weight: 700; color: #566a7f; text-transform: uppercase; padding: 12px; white-space: nowrap; }
+        .table td { padding: 12px; color: #697a8d; border-bottom: 1px solid #f0f2f4; white-space: nowrap; vertical-align: middle; }
         
-        .table { min-width: 1200px; margin-bottom: 0; font-size: 0.8rem; }
-        .table thead { background-color: #f8f9fa; border-bottom: 2px solid #f0f2f4; }
-        .table th { font-weight: 700; color: #566a7f; text-transform: uppercase; padding: 12px 10px; white-space: nowrap; }
-        .table td { padding: 10px; color: #697a8d; border-bottom: 1px solid #f0f2f4; white-space: nowrap; vertical-align: middle; }
-        
-        /* Badge Status */
-        .st-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-        .booked { background: #fff2e2; color: var(--warning); }
-        .rent { background: #e8fadf; color: var(--success); }
-        
-        /* Bottom Navigation */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
-        .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.65rem; font-weight: 600; flex: 1; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        /* Status Badges */
+        .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+        .status-booked { background: #fff2e2; color: var(--warning); }
+        .status-rent { background: #e8fadf; color: var(--success); }
 
-        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); z-index: 999; }
+        /* Navigasi Sesuai Keinginan Kakak */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
+        .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 3px; }
+        
+        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
     </style>
 </head>
 <body>
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold m-0">Register</h5>
-            <span class="badge bg-label-primary text-primary" style="font-size: 0.7rem;"><i class="fas fa-database me-1"></i> Connected</span>
+            <h4 class="fw-bold m-0 text-dark">Register</h4>
+            <div class="text-muted small"><i class="fas fa-check-circle text-success"></i> Connected</div>
         </div>
 
-        <div class="input-group mb-3 shadow-sm border rounded-3 overflow-hidden">
+        <div class="input-group mb-3 shadow-sm rounded-3 overflow-hidden border">
             <span class="input-group-text bg-white border-0"><i class="fas fa-search"></i></span>
             <input type="text" id="searchReg" class="form-control border-0" placeholder="Cari penyewa atau motor..." onkeyup="filterReg()">
         </div>
@@ -58,15 +51,16 @@
                 <thead>
                     <tr>
                         <th>No Motor</th>
+                        <th>No Register</th>
                         <th>Penyewa</th>
-                        <th>Tgl Mulai</th>
+                        <th>No WA</th>
+                        <th>Tgl Sewa</th>
                         <th>Jml Hari</th>
-                        <th>Tgl Selesai</th>
                         <th>Harga Sewa</th>
                         <th>Diskon</th>
                         <th>Total Harga</th>
                         <th>DP</th>
-                        <th>Total Tagihan</th>
+                        <th>Tagihan</th>
                         <th>Status</th>
                         <th>Helm</th>
                     </tr>
@@ -77,55 +71,53 @@
         </div>
     </div>
 
-    <button class="fab-add"><i class="fas fa-plus"></i></button>
+    <button class="fab-add" onclick="openForm()"><i class="fas fa-plus fa-lg"></i></button>
 
     <div class="bottom-nav">
-        <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
-        <a href="customer.html" class="nav-item"><i class="fas fa-users"></i>Customer</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="item.html" class="nav-item"><i class="fas fa-th-list"></i>Armada</a>
         <a href="register.html" class="nav-item active"><i class="fas fa-calendar-check"></i>Register</a>
-        <a href="units.html" class="nav-item"><i class="fas fa-motorcycle"></i>Units</a>
-        <a href="finance.html" class="nav-item"><i class="fas fa-dollar-sign"></i>Keuangan</a>
+        <a href="customer.html" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
     <script>
-        // Data Dummy berdasarkan SS Kakak
-        const masterReg = [
-            { motor: "DK6124FC", nama: "Lisa liu", tgl: "4/7/2026", hari: 2, tgl_selesai: "4/9/2026", harga: 90000, diskon: 0, total: 180000, dp: 0, tagihan: 180000, status: "Booked", helm: 2 },
-            { motor: "DK4892FB", nama: "Christopher van", tgl: "4/7/2026", hari: 6, tgl_selesai: "4/12/2026", harga: 150000, diskon: 0, total: 900000, dp: 0, tagihan: 900000, status: "Booked", helm: 2 },
-            { motor: "DK4478FAD", nama: "Ibu dora", tgl: "3/4/2026", hari: 31, tgl_selesai: "4/4/2026", harga: 70000, diskon: 0, total: 850000, dp: 850000, tagihan: 0, status: "Rent", helm: 2 }
-        ];
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbxC55Pe2xDqGfqi9mOAs_tAqwetECKp5uOHwG1grJ_rrqdIhLQ1IXG0DBzBmWhCFRYzVQ/exec";
+        let masterData = [];
+
+        function loadData() {
+            fetch(`${webAppUrl}?action=read_full&email=${localStorage.getItem('ams_user_email')}`)
+                .then(res => res.json())
+                .then(data => {
+                    masterData = data.registers || [];
+                    renderTable(masterData);
+                });
+        }
 
         function renderTable(data) {
             let html = "";
             data.forEach(r => {
-                let stClass = r.status.toLowerCase() === 'booked' ? 'booked' : 'rent';
-                let iconStatus = r.status.toLowerCase() === 'booked' ? '<i class="far fa-compass me-1"></i>' : '<i class="fas fa-check-circle me-1"></i>';
-                
+                let stClass = (r.status || 'Booked').toLowerCase() === 'booked' ? 'status-booked' : 'status-rent';
                 html += `
                 <tr>
-                    <td class="fw-bold text-success">${r.motor}</td>
-                    <td>${r.nama}</td>
-                    <td>${r.tgl}</td>
-                    <td class="text-center">${r.hari}</td>
-                    <td>${r.tgl_selesai}</td>
-                    <td>Rp${r.harga.toLocaleString('id-ID')}</td>
-                    <td>Rp${r.diskon.toLocaleString('id-ID')}</td>
-                    <td class="fw-bold">Rp${r.total.toLocaleString('id-ID')}</td>
-                    <td>Rp${r.dp.toLocaleString('id-ID')}</td>
-                    <td class="text-danger fw-bold">Rp${r.tagihan.toLocaleString('id-ID')}</td>
-                    <td><span class="st-badge ${stClass}">${iconStatus}${r.status}</span></td>
-                    <td class="text-center">${r.helm}</td>
+                    <td class="fw-bold text-primary">${r.no_motor || '-'}</td>
+                    <td><small>${r.no_register || '-'}</small></td>
+                    <td><div class="fw-bold text-dark">${r.nama || '-'}</div></td>
+                    <td>${r.no_wa || '-'}</td>
+                    <td>${r.tgl_sewa || '-'}</td>
+                    <td class="text-center">${r.jml_hari || 0}</td>
+                    <td>Rp${parseInt(r.harga || 0).toLocaleString('id-ID')}</td>
+                    <td>Rp${parseInt(r.diskon || 0).toLocaleString('id-ID')}</td>
+                    <td class="fw-bold text-dark">Rp${parseInt(r.total || 0).toLocaleString('id-ID')}</td>
+                    <td>Rp${parseInt(r.bayar_dp || 0).toLocaleString('id-ID')}</td>
+                    <td class="fw-bold text-danger">Rp${parseInt(r.sisa_tagihan || 0).toLocaleString('id-ID')}</td>
+                    <td><span class="badge-status ${stClass}">${r.status || 'Booked'}</span></td>
+                    <td class="text-center">${r.jml_helm || 0}</td>
                 </tr>`;
             });
-            document.getElementById('register-body').innerHTML = html;
+            document.getElementById('register-body').innerHTML = html || '<tr><td colspan="13" class="text-center">Memuat data...</td></tr>';
         }
 
-        renderTable(masterReg);
-
-        function filterReg() {
-            let q = document.getElementById('searchReg').value.toLowerCase();
-            renderTable(masterReg.filter(r => r.nama.toLowerCase().includes(q) || r.motor.toLowerCase().includes(q)));
-        }
+        window.onload = loadData;
     </script>
 </body>
 </html>
