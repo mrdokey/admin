@@ -70,7 +70,7 @@
                     <form id="formCustomer">
                         <input type="hidden" id="f_is_edit" value="false"><input type="hidden" id="f_old_wa"> 
                         <div class="mb-3"><label class="form-label">Nama <span class="text-danger">*</span></label><input type="text" class="form-control" id="f_nama" required></div>
-                        <div class="mb-3"><label class="form-label">No WA <span class="text-danger">*</span></label><input type="tel" class="form-control" id="f_wa" required></div>
+                        <div class="mb-3"><label class="form-label">No WA <span class="text-danger">*</span></label><input type="tel" class="form-control" id="f_wa" placeholder="Contoh: 0857... atau +61..." required></div>
                         <div class="mb-3"><label class="form-label">IG</label><input type="text" class="form-control" id="f_ig"></div>
                         <div class="mb-3"><label class="form-label">Alamat Antar</label><input type="text" class="form-control" id="f_alamat_antar"></div>
                         <div class="mb-4"><label class="form-label">Alamat Jemput</label><input type="text" class="form-control" id="f_alamat_jemput"></div>
@@ -106,6 +106,19 @@
             loadCustomers();
         };
 
+        function formatWaForLink(rawNumber) {
+            let num = rawNumber ? rawNumber.toString().trim() : '';
+            if (num.startsWith('+')) {
+                return num.replace(/\D/g, '');
+            } else if (num.startsWith('0')) {
+                return '62' + num.substring(1).replace(/\D/g, '');
+            } else if (num.startsWith('8')) {
+                return '62' + num.replace(/\D/g, '');
+            } else {
+                return num.replace(/\D/g, '');
+            }
+        }
+
         function loadCustomers() {
             document.getElementById('loading-overlay').style.display = 'flex';
             fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
@@ -123,10 +136,7 @@
         function renderCustomers(data) {
             let html = "";
             data.forEach(c => {
-                let cleanWA = c.no_wa ? c.no_wa.toString().replace(/\D/g, '') : '';
-                if (cleanWA.startsWith('0')) cleanWA = '62' + cleanWA.substring(1);
-                else if (cleanWA.startsWith('8')) cleanWA = '62' + cleanWA;
-
+                let cleanWA = formatWaForLink(c.no_wa);
                 html += `
                 <div class="customer-card" onclick="openDetailPopUp('${c.no_wa}')">
                     <div class="cust-icon-circle"><i class="fas fa-user"></i></div>
@@ -153,8 +163,7 @@
                 document.getElementById('d_alamat_antar_display').innerText = c.alamat_antar || '-';
                 document.getElementById('d_alamat_jemput_display').innerText = c.alamat_jemput || '-';
                 
-                let cleanWA = c.no_wa.toString().replace(/\D/g, '');
-                if (cleanWA.startsWith('0')) cleanWA = '62' + cleanWA.substring(1);
+                let cleanWA = formatWaForLink(c.no_wa);
                 document.getElementById('d_wa_link').href = `https://wa.me/${cleanWA}`;
                 modalDetail.show();
             }
