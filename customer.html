@@ -10,91 +10,53 @@
     <style>
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
         .content-area { padding: 20px; }
-        
-        /* === STYLE UNTUK LIST === */
         .customer-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
         .customer-card:active { transform: scale(0.98); background: #f8f9fa; }
         .cust-icon-circle { width: 45px; height: 45px; background: rgba(105, 108, 255, 0.1); color: #696cff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
-        .cust-info { flex-grow: 1; }
-        .btn-wa-action { background-color: #25D366; color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; margin-left: 10px; }
-
-        /* === STYLE UNTUK NAV & FAB === */
+        .cust-info { flex-grow: 1; overflow: hidden; }
+        .cust-info div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-wa-list { background-color: #25D366; color: white; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; text-decoration: none; margin-left: 10px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(37, 211, 102, 0.3); }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
         .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #696cff; color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
-        
-        /* === STYLE UNTUK FORM (MODAL) === */
         .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 4px; text-transform: uppercase; }
         .form-control { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; }
-        
-        /* === STYLE UNTUK POP-UP DETAIL === */
-        .detail-avatar-container { text-align: center; padding: 20px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 15px; }
-        .detail-avatar-icon { font-size: 60px; color: #d9dee3; /* Ikon standard mirip image_5.png */ }
-        .detail-name { font-size: 1.2rem; font-weight: 700; color: #566a7f; margin-top: 10px; }
-        .detail-field { margin-bottom: 10px; display: flex; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; }
-        .detail-field-label { width: 100px; font-weight: 600; color: #a1acb8; font-size: 0.8rem; text-transform: uppercase; }
-        .detail-field-value { flex-grow: 1; color: #697a8d; font-size: 0.9rem; }
-        .related-header { font-size: 0.8rem; font-weight: 700; color: #a1acb8; text-transform: uppercase; background: #f5f5f9; padding: 5px 15px; margin: 15px -15px 10px -15px; }
-
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .detail-avatar-container { text-align: center; padding: 20px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 15px; }
+        .detail-avatar-icon { font-size: 60px; color: #d9dee3; }
+        .detail-name { font-size: 1.2rem; font-weight: 700; color: #566a7f; margin-top: 10px; }
+        .detail-field { margin-bottom: 10px; display: flex; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; align-items: center; }
+        .detail-field-label { width: 90px; font-weight: 600; color: #a1acb8; font-size: 0.75rem; text-transform: uppercase; flex-shrink: 0; }
+        .detail-field-value { flex-grow: 1; color: #697a8d; font-size: 0.9rem; word-break: break-word; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Proses...</p></div>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Sinkronisasi...</p></div>
 
-    <div class="content-area" id="list-container">
+    <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0 text-dark">Data Customer</h4>
             <button class="btn btn-sm btn-light border rounded-pill" onclick="loadCustomers()"><i class="fas fa-sync text-primary"></i></button>
         </div>
         <input type="text" id="searchCust" class="form-control mb-3 shadow-sm border-0" placeholder="Cari nama atau nomor WA..." onkeyup="filterCustomer()" style="background:#fff; padding:12px;">
-        
-        <div id="customer-list">
-            </div>
+        <div id="customer-list"></div>
     </div>
 
-    <button class="fab-add" onclick="openFormForAdd()">
-        <i class="fas fa-plus fa-lg"></i>
-    </button>
+    <button class="fab-add" onclick="openFormForAdd()"><i class="fas fa-plus fa-lg"></i></button>
 
     <div class="modal fade" id="modalDetail" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered p-3">
             <div class="modal-content border-0 rounded-4 shadow-lg">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+                <div class="modal-header border-0 pb-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body p-4 pt-0">
-                    <div class="detail-avatar-container">
-                        <i class="fas fa-user-circle detail-avatar-icon"></i>
-                        <div class="detail-name" id="d_nama_display">Nama Pelanggan</div>
-                    </div>
-                    
-                    <div class="detail-field">
-                        <div class="detail-field-label">No WA</div>
-                        <div class="detail-field-value" id="d_wa_display">-</div>
-                        <a href="#" id="d_wa_link" target="_blank" class="btn btn-sm btn-success rounded-pill ms-2"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                    <div class="detail-field">
-                        <div class="detail-field-label">IG</div>
-                        <div class="detail-field-value" id="d_ig_display">-</div>
-                    </div>
-                    <div class="detail-field">
-                        <div class="detail-field-label">Antar</div>
-                        <div class="detail-field-value" id="d_alamat_antar_display">-</div>
-                    </div>
-                    <div class="detail-field">
-                        <div class="detail-field-label">Jemput</div>
-                        <div class="detail-field-value" id="d_alamat_jemput_display">-</div>
-                    </div>
-
-                    <div class="related-header">Related Registers <span class="badge bg-light text-dark rounded-pill">0</span></div>
-                    <div class="text-center text-muted small py-3">No registers found</div>
-
-                    <button class="btn btn-outline-primary w-100 mt-3 fw-bold rounded-pill" onclick="switchToEditMode()">
-                        <i class="fas fa-user-edit me-1"></i> Edit Data
-                    </button>
+                    <div class="detail-avatar-container"><i class="fas fa-user-circle detail-avatar-icon"></i><div class="detail-name" id="d_nama_display">Nama</div></div>
+                    <div class="detail-field"><div class="detail-field-label">No WA</div><div class="detail-field-value" id="d_wa_display">-</div><a href="#" id="d_wa_link" target="_blank" class="btn btn-sm btn-success rounded-pill ms-2"><i class="fab fa-whatsapp"></i></a></div>
+                    <div class="detail-field"><div class="detail-field-label">IG</div><div class="detail-field-value" id="d_ig_display">-</div></div>
+                    <div class="detail-field"><div class="detail-field-label">Antar</div><div class="detail-field-value" id="d_alamat_antar_display">-</div></div>
+                    <div class="detail-field"><div class="detail-field-label">Jemput</div><div class="detail-field-value" id="d_alamat_jemput_display">-</div></div>
+                    <button class="btn btn-primary w-100 mt-3 fw-bold rounded-pill" onclick="switchToEditMode()"><i class="fas fa-user-edit me-1"></i> Edit Data</button>
                 </div>
             </div>
         </div>
@@ -106,30 +68,12 @@
                 <div class="modal-body p-4">
                     <h5 class="fw-bold text-dark mb-4" id="modalTitle">Tambah Customer</h5>
                     <form id="formCustomer">
-                        <input type="hidden" id="f_is_edit" value="false">
-                        <input type="hidden" id="f_old_wa"> 
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Nama <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="f_nama" placeholder="Contoh: Sanjaya" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">No WA <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="f_wa" placeholder="Contoh: 0857xxx" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">IG</label>
-                            <input type="text" class="form-control" id="f_ig" placeholder="@username">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Alamat Antar</label>
-                            <input type="text" class="form-control" id="f_alamat_antar" placeholder="Detail Lokasi Antar">
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Alamat Jemput</label>
-                            <input type="text" class="form-control" id="f_alamat_jemput" placeholder="Detail Lokasi Jemput">
-                        </div>
-                        
+                        <input type="hidden" id="f_is_edit" value="false"><input type="hidden" id="f_old_wa"> 
+                        <div class="mb-3"><label class="form-label">Nama <span class="text-danger">*</span></label><input type="text" class="form-control" id="f_nama" required></div>
+                        <div class="mb-3"><label class="form-label">No WA <span class="text-danger">*</span></label><input type="tel" class="form-control" id="f_wa" required></div>
+                        <div class="mb-3"><label class="form-label">IG</label><input type="text" class="form-control" id="f_ig"></div>
+                        <div class="mb-3"><label class="form-label">Alamat Antar</label><input type="text" class="form-control" id="f_alamat_antar"></div>
+                        <div class="mb-4"><label class="form-label">Alamat Jemput</label><input type="text" class="form-control" id="f_alamat_jemput"></div>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-light w-100 fw-bold py-2 rounded-pill" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow" id="btn_submit">Save</button>
@@ -153,7 +97,7 @@
         const userEmail = localStorage.getItem('ams_user_email');
         let masterCustomers = [];
         let modalDetail, modalForm;
-        let selectedCustomerData = null; // Menyimpan data sementara saat pop-up detail terbuka
+        let selectedCustomerData = null;
 
         window.onload = function() {
             if (!userEmail) { window.location.href = "login.html"; return; }
@@ -170,18 +114,19 @@
                 masterCustomers = data.customers || [];
                 renderCustomers(masterCustomers);
                 document.getElementById('loading-overlay').style.display = 'none';
-            })
-            .catch(err => {
+            }).catch(err => {
                 console.error(err);
                 document.getElementById('loading-overlay').style.display = 'none';
             });
         }
 
-        // --- LIST VIEW LOGIC (Sesuai Konsep Awal) ---
         function renderCustomers(data) {
             let html = "";
             data.forEach(c => {
-                const cleanWA = c.no_wa ? c.no_wa.toString().replace(/\D/g, '') : '';
+                let cleanWA = c.no_wa ? c.no_wa.toString().replace(/\D/g, '') : '';
+                if (cleanWA.startsWith('0')) cleanWA = '62' + cleanWA.substring(1);
+                else if (cleanWA.startsWith('8')) cleanWA = '62' + cleanWA;
+
                 html += `
                 <div class="customer-card" onclick="openDetailPopUp('${c.no_wa}')">
                     <div class="cust-icon-circle"><i class="fas fa-user"></i></div>
@@ -190,102 +135,79 @@
                         <div class="small text-muted">${c.no_wa}</div>
                         <div class="small text-muted" style="font-size: 0.7rem;"><i class="fas fa-map-marker-alt me-1"></i> ${c.alamat_antar || '-'}</div>
                     </div>
+                    <a href="https://wa.me/${cleanWA}" class="btn-wa-list" onclick="event.stopPropagation();" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
                 </div>`;
             });
             document.getElementById('customer-list').innerHTML = html || '<p class="text-center mt-5 text-muted">Belum ada customer.</p>';
         }
 
-        // --- POP-UP DETAIL LOGIC (IMAGE_5.png) ---
         function openDetailPopUp(waKey) {
             const c = masterCustomers.find(item => item.no_wa == waKey);
             if(c) {
-                selectedCustomerData = c; // Simpan untuk edit
+                selectedCustomerData = c;
                 document.getElementById('d_nama_display').innerText = c.nama;
                 document.getElementById('d_wa_display').innerText = c.no_wa;
                 document.getElementById('d_ig_display').innerText = c.ig || '-';
                 document.getElementById('d_alamat_antar_display').innerText = c.alamat_antar || '-';
                 document.getElementById('d_alamat_jemput_display').innerText = c.alamat_jemput || '-';
                 
-                // Link WA Cepat
-                const cleanWA = c.no_wa.toString().replace(/\D/g, '');
-                const finalWA = cleanWA.startsWith('0') ? '62' + cleanWA.substring(1) : cleanWA;
-                document.getElementById('d_wa_link').href = `https://wa.me/${finalWA}`;
-                
+                let cleanWA = c.no_wa.toString().replace(/\D/g, '');
+                if (cleanWA.startsWith('0')) cleanWA = '62' + cleanWA.substring(1);
+                document.getElementById('d_wa_link').href = `https://wa.me/${cleanWA}`;
                 modalDetail.show();
             }
         }
 
-        // --- FORM LOGIC (IMAGE_3.png & IMAGE_4.png) ---
         function openFormForAdd() {
             document.getElementById('formCustomer').reset();
             document.getElementById('modalTitle').innerText = "Tambah Customer";
             document.getElementById('f_is_edit').value = "false";
-            document.getElementById('f_old_wa').value = "";
-            document.getElementById('f_wa').readOnly = false; // WA bisa diisi saat tambah baru
-            document.getElementById('btn_submit').innerText = "Save";
+            document.getElementById('f_wa').readOnly = false;
             modalForm.show();
         }
 
         function switchToEditMode() {
-            // Tutup detail, buka form
             modalDetail.hide();
-            setTimeout(() => { openFormForEdit(selectedCustomerData.no_wa); }, 400);
-        }
-
-        function openFormForEdit(waKey) {
-            document.getElementById('formCustomer').reset();
-            const c = masterCustomers.find(item => item.no_wa == waKey);
-            if(c) {
-                document.getElementById('modalTitle').innerText = "Edit Data Customer";
+            setTimeout(() => {
+                const c = selectedCustomerData;
+                document.getElementById('modalTitle').innerText = "Edit Customer";
                 document.getElementById('f_is_edit').value = "true";
                 document.getElementById('f_old_wa').value = c.no_wa;
-                
-                // Isi Field Form
                 document.getElementById('f_nama').value = c.nama;
                 document.getElementById('f_wa').value = c.no_wa;
+                document.getElementById('f_wa').readOnly = true;
                 document.getElementById('f_ig').value = c.ig || '';
                 document.getElementById('f_alamat_antar').value = c.alamat_antar || '';
                 document.getElementById('f_alamat_jemput').value = c.alamat_jemput || '';
-                
-                document.getElementById('f_wa').readOnly = true; // Key No WA jangan diubah saat edit
-                document.getElementById('btn_submit').innerText = "Update";
                 modalForm.show();
-            }
+            }, 400);
         }
 
         document.getElementById('formCustomer').onsubmit = function(e) {
             e.preventDefault();
             document.getElementById('loading-overlay').style.display = 'flex';
-            
             const isEdit = document.getElementById('f_is_edit').value === "true";
             const payload = {
                 action: isEdit ? "update_customer" : "insert_customer",
                 email: userEmail,
                 nama: document.getElementById('f_nama').value,
                 wa: document.getElementById('f_wa').value,
-                old_wa: document.getElementById('f_old_wa').value, // Penting untuk update key
+                old_wa: document.getElementById('f_old_wa').value,
                 ig: document.getElementById('f_ig').value,
                 addr_antar: document.getElementById('f_alamat_antar').value,
                 addr_jemput: document.getElementById('f_alamat_jemput').value
             };
 
             fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
-            .then(() => {
-                modalForm.hide();
-                loadCustomers(); // Reload list
-            })
-            .catch(err => {
-                alert("Gagal menyimpan data: " + err);
-                document.getElementById('loading-overlay').style.display = 'none';
-            });
+            .then(() => { modalForm.hide(); loadCustomers(); })
+            .catch(err => { alert("Gagal!"); document.getElementById('loading-overlay').style.display = 'none'; });
         };
 
         function filterCustomer() {
             let q = document.getElementById('searchCust').value.toLowerCase();
-            renderCustomers(masterCustomers.filter(c => 
-                (c.nama && c.nama.toLowerCase().includes(q)) || 
-                (c.no_wa && c.no_wa.toString().includes(q))
-            ));
+            renderCustomers(masterCustomers.filter(c => (c.nama && c.nama.toLowerCase().includes(q)) || (c.no_wa && c.no_wa.toString().includes(q))));
         }
     </script>
 </body>
