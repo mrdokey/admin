@@ -14,19 +14,14 @@
         .unit-img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; margin-right: 15px; background: #f0f0f0; }
         .unit-info { flex-grow: 1; }
         .unit-name { font-weight: 700; color: #566a7f; margin: 0; font-size: 0.9rem; }
-        
-        /* Style Grouping ala AppSheet */
         .group-header { border-left: 4px solid #696cff; background: rgba(105, 108, 255, 0.05); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 25px; margin-bottom: 10px; }
         .status-available { background: #e8fadf; color: #71dd37; }
         .status-rent { background: #ffe5e5; color: #ff3e1d; }
         .status-booked { background: #fff2e2; color: #fdac41; }
-        
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e7e7ff; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
-        
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
@@ -35,25 +30,23 @@
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0">Armada Motor</h4>
+            <h4 class="fw-bold mb-0">Daftar Armada</h4>
             <button class="btn btn-sm btn-light border" onclick="loadUnits()"><i class="fas fa-sync"></i></button>
         </div>
         
-        <input type="text" id="search" class="form-control mb-2 rounded-pill border-0 shadow-sm px-3" placeholder="Cari unit atau tipe..." onkeyup="filterUnit()">
+        <input type="text" id="search" class="form-control mb-2 rounded-pill border-0 shadow-sm px-3" placeholder="Cari unit, tipe, atau brand..." onkeyup="filterUnit()">
         
-        <div id="unit-list">
-            </div>
+        <div id="unit-list"></div>
     </div>
 
     <div class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
-        <a href="item.html" class="nav-item active"><i class="fas fa-motorcycle"></i>Armada</a>
+        <a href="item.html" class="nav-item active"><i class="fas fa-th-list"></i>Armada</a>
         <a href="#" class="nav-item"><i class="fas fa-wallet"></i>Cashflow</a>
         <a href="#" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
     <script>
-        // URL Web App GAS kamu
         const webAppUrl = "https://script.google.com/macros/s/AKfycbwdmzb73BiGP7NualXFfyZcn75MNektvXzGm-tOFL3A7eZE-kWO7E4HRMOnOdI-ElyjTg/exec";
         const userEmail = localStorage.getItem('ams_user_email');
         let masterUnits = [];
@@ -71,15 +64,10 @@
                 masterUnits = data.units || [];
                 renderUnits(masterUnits);
                 document.getElementById('loading-overlay').style.display = 'none';
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('loading-overlay').style.display = 'none';
             });
         }
 
         function renderUnits(units) {
-            // Logika Grouping ala AppSheet
             const groups = {
                 'Rent': units.filter(u => u.status === 'Rent'),
                 'Booked': units.filter(u => u.status === 'Booked'),
@@ -87,23 +75,16 @@
             };
 
             let html = "";
-
             for (const [status, data] of Object.entries(groups)) {
                 if (data.length > 0) {
                     let sBadge = status === 'Available' ? 'status-available' : (status === 'Rent' ? 'status-rent' : 'status-booked');
-                    
-                    // Header Group
-                    html += `
-                        <div class="group-header d-flex justify-content-between align-items-center">
+                    html += `<div class="group-header d-flex justify-content-between align-items-center">
                             <span class="fw-bold text-dark text-uppercase" style="font-size: 0.75rem;">${status}</span>
                             <span class="badge rounded-pill ${sBadge}" style="font-size: 0.7rem;">${data.length} Unit</span>
-                        </div>
-                    `;
+                        </div>`;
 
-                    // List Item per Group
                     data.forEach(u => {
-                        html += `
-                        <div class="unit-card">
+                        html += `<div class="unit-card">
                             <img src="${u.foto_link}" class="unit-img" loading="lazy" onerror="this.src='https://via.placeholder.com/80'">
                             <div class="unit-info">
                                 <div class="d-flex justify-content-between align-items-start">
