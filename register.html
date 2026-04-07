@@ -3,149 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMS RIDE | Register System</title>
+    <title>AMS RIDE | Register Data</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #696cff; --secondary: #8592a3; --success: #71dd37; --danger: #ff3e1d; --warning: #fdac41; --info: #03c3ec; }
-        body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; color: #566a7f; }
+        :root { --primary: #696cff; --secondary: #8592a3; --success: #71dd37; --danger: #ff3e1d; --warning: #fdac41; }
+        body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
         
         .content-area { padding: 20px; }
         
-        /* Dashboard Mini ala AppSheet */
-        .stat-banner { background: var(--primary); color: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.3); }
+        /* Table Style ala AppSheet Desktop */
+        .table-container { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .table { margin-bottom: 0; font-size: 0.85rem; vertical-align: middle; }
+        .table thead { background-color: #f8f9fa; border-bottom: 2px solid #f0f2f4; }
+        .table th { font-weight: 700; color: #566a7f; text-transform: uppercase; font-size: 0.7rem; padding: 15px; border: none; }
+        .table td { padding: 12px 15px; color: #697a8d; border-bottom: 1px solid #f0f2f4; border-top: none; }
         
-        /* Card Style Upgrade */
-        .reg-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 6px solid var(--primary); transition: transform 0.2s; }
-        .reg-card:active { transform: scale(0.98); }
-        .status-booked { border-left-color: var(--warning); }
-        .status-rent { border-left-color: var(--danger); }
-        .status-back { border-left-color: var(--success); }
-        
-        /* Typography */
-        .reg-no { font-size: 0.7rem; font-weight: 700; color: var(--secondary); letter-spacing: 0.5px; }
-        .cust-name { font-size: 1rem; font-weight: 700; color: #32475c; }
-        .price-tag { font-size: 0.95rem; font-weight: 700; color: var(--primary); }
-
-        /* Form Styling */
-        .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 6px; text-transform: uppercase; }
-        .form-control, .form-select { border: 1px solid #d9dee3; background-color: #fff; padding: 12px 15px; border-radius: 8px; font-size: 0.9rem; transition: all 0.2s; }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.1); }
-        
-        /* Custom Badge */
-        .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        /* Status Badges */
+        .badge-status { padding: 5px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
         .bg-booked { background: #fff2e2; color: var(--warning); }
         .bg-rent { background: #ffe5e0; color: var(--danger); }
         .bg-back { background: #e8fadf; color: var(--success); }
-        
-        /* Nav & FAB */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
-        .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
+
+        /* Navigasi */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
+        .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; flex: 1; }
         .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
+        .nav-item i { font-size: 1.3rem; display: block; margin-bottom: 3px; }
         
-        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(105, 108, 255, 0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
-        
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        /* Floating Button */
+        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
-        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-        <p class="fw-bold">Processing Transaction...</p>
+        <div class="spinner-border text-primary mb-2"></div>
+        <p class="small fw-bold">Memproses...</p>
     </div>
 
     <div class="content-area">
-        <div class="stat-banner d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="fw-bold mb-0">MRD Rental System</h5>
-                <p class="mb-0 opacity-75" id="sync-status" style="font-size: 0.8rem;">Connecting to server...</p>
-            </div>
-            <button class="btn btn-white btn-sm rounded-circle bg-white shadow-sm" onclick="loadRegisters()">
-                <i class="fas fa-sync-alt text-primary"></i>
-            </button>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold m-0 text-dark">Register</h4>
+            <div id="sync-status" class="text-muted" style="font-size: 0.7rem;"><i class="fas fa-check-circle text-success"></i> Connected</div>
         </div>
 
-        <div class="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white border-0">
-            <span class="input-group-text border-0 bg-white ps-3"><i class="fas fa-search text-muted"></i></span>
-            <input type="text" id="searchReg" class="form-control border-0 py-3" placeholder="Search by name or plate..." onkeyup="filterReg()">
+        <div class="input-group mb-3 shadow-sm rounded-3 overflow-hidden border-0">
+            <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" id="searchReg" class="form-control border-0 py-2" placeholder="Cari penyewa atau motor..." onkeyup="filterReg()">
         </div>
-        
-        <div id="register-list">
-            <div class="text-center py-5">
-                <div class="spinner-border text-light"></div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Penyewa</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="register-table-body">
+                        </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <button class="fab-add" onclick="openRegForm()">
-        <i class="fas fa-plus fa-lg"></i>
-    </button>
+    <button class="fab-add" onclick="openRegForm()"><i class="fas fa-plus fa-lg"></i></button>
 
-    <div class="modal fade" id="modalReg" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalReg" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content shadow-none">
-                <div class="modal-header border-bottom px-4">
-                    <div>
-                        <h5 class="fw-bold mb-0">New Registration</h5>
-                        <small class="text-muted">Fill in rental details</small>
-                    </div>
+            <div class="modal-content">
+                <div class="modal-header border-0 shadow-sm sticky-top bg-white">
+                    <h5 class="fw-bold mb-0">Input Sewa Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 bg-light">
                     <form id="formRegister">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                            <label class="form-label text-primary"><i class="fas fa-motorcycle me-1"></i> Unit Selection</label>
+                        <div class="card border-0 shadow-sm rounded-4 p-3 mb-3">
+                            <label class="form-label">No Motor*</label>
                             <select class="form-select mb-3" id="f_motor" required onchange="calcTotal()"></select>
-                            
-                            <label class="form-label text-primary"><i class="fas fa-user me-1"></i> Customer Info</label>
+                            <label class="form-label">Penyewa*</label>
                             <select class="form-select mb-3" id="f_nama" required onchange="autoFillCust()"></select>
-                            <input type="text" class="form-control mb-3" id="f_wa" readonly placeholder="Phone Number">
+                            <input type="text" class="form-control" id="f_wa" readonly placeholder="No WA">
                         </div>
-
-                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                            <label class="form-label text-primary"><i class="fas fa-calendar-alt me-1"></i> Schedule & Pricing</label>
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <label class="form-label">Date Start</label>
-                                    <input type="date" class="form-control" id="f_tgl_sewa" required onchange="calcTotal()">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Duration (Day)</label>
-                                    <input type="number" class="form-control" id="f_hari" value="1" min="1" oninput="calcTotal()">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Helmet Qty</label>
-                                    <input type="number" class="form-control" id="f_helm" value="2">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Down Payment</label>
-                                    <input type="number" class="form-control" id="f_dp" value="0" oninput="calcSisa()">
-                                </div>
+                        <div class="card border-0 shadow-sm rounded-4 p-3 mb-3">
+                            <div class="row g-2">
+                                <div class="col-6"><label class="form-label">Tgl Sewa</label><input type="date" class="form-control" id="f_tgl_sewa" required onchange="calcTotal()"></div>
+                                <div class="col-6"><label class="form-label">Hari</label><input type="number" class="form-control" id="f_hari" value="1" min="1" oninput="calcTotal()"></div>
                             </div>
                         </div>
-
-                        <div class="card border-0 bg-primary text-white shadow-sm rounded-4 p-4 mb-4">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Total Rental:</span>
-                                <span class="fw-bold" id="f_total_disp">Rp 0</span>
-                            </div>
-                            <div class="d-flex justify-content-between border-top pt-2">
-                                <span>Balance Due:</span>
-                                <span class="fw-bold text-warning" id="f_sisa_disp">Rp 0</span>
-                            </div>
+                        <div class="card border-0 bg-primary text-white p-3 mb-3">
+                            <div class="d-flex justify-content-between"><span>Total:</span> <span id="f_total_disp" class="fw-bold">Rp 0</span></div>
                             <input type="hidden" id="f_total_val" value="0">
                         </div>
-
-                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                            <label class="form-label text-primary"><i class="fas fa-map-marker-alt me-1"></i> Logistics</label>
-                            <input type="text" class="form-control mb-3" id="f_antar" placeholder="Delivery Address">
-                            <input type="text" class="form-control" id="f_jemput" placeholder="Pickup Address">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-pill shadow-lg mt-2">SAVE RECORD</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-pill">SIMPAN DATA</button>
                     </form>
                 </div>
             </div>
@@ -153,110 +109,66 @@
     </div>
 
     <div class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-chart-pie"></i>Dashboard</a>
-        <a href="item.html" class="nav-item"><i class="fas fa-motorcycle"></i>Units</a>
-        <a href="register.html" class="nav-item active"><i class="fas fa-file-invoice"></i>Register</a>
-        <a href="customer.html" class="nav-item"><i class="fas fa-users"></i>Clients</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="item.html" class="nav-item"><i class="fas fa-th-list"></i>Armada</a>
+        <a href="register.html" class="nav-item active"><i class="fas fa-calendar-check"></i>Register</a>
+        <a href="customer.html" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const webAppUrl = "https://script.google.com/macros/s/AKfycbxC55Pe2xDqGfqi9mOAs_tAqwetECKp5uOHwG1grJ_rrqdIhLQ1IXG0DBzBmWhCFRYzVQ/exec";
         const userEmail = localStorage.getItem('ams_user_email');
-        
         let masterReg = [], listCust = [], listUnit = [];
         let modalReg;
 
         window.onload = function() {
             modalReg = new bootstrap.Modal(document.getElementById('modalReg'));
-            if(!userEmail) { window.location.href = "index.html"; return; }
             loadRegisters();
         };
 
         function loadRegisters() {
-            document.getElementById('sync-status').innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Syncing with Cloud...';
-            
             fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
-            .then(r => r.json())
-            .then(data => {
+            .then(r => r.json()).then(data => {
                 masterReg = data.registers || [];
                 listCust = data.customers || [];
                 listUnit = data.units || [];
-                
-                renderReg(masterReg);
-                
+                renderTable(masterReg);
                 localStorage.setItem('ams_last_customers', JSON.stringify(listCust));
                 localStorage.setItem('ams_last_units', JSON.stringify(listUnit));
-                
-                document.getElementById('sync-status').innerHTML = '<i class="fas fa-check-circle"></i> Database Connected';
-            })
-            .catch(() => {
-                listCust = JSON.parse(localStorage.getItem('ams_last_customers') || "[]");
-                listUnit = JSON.parse(localStorage.getItem('ams_last_units') || "[]");
-                document.getElementById('sync-status').innerHTML = '<i class="fas fa-wifi-slash"></i> Offline Mode';
             });
         }
 
-        function renderReg(data) {
+        function renderTable(data) {
             let html = "";
             data.forEach(r => {
                 let status = (r.status || 'Booked').toLowerCase();
-                let statusClass = `status-${status}`;
-                let badgeClass = `bg-${status}`;
-                
                 html += `
-                <div class="reg-card ${statusClass}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="reg-no"><i class="fas fa-hashtag me-1"></i>${r.no_register}</span>
-                        <span class="badge-status ${badgeClass}">${status}</span>
-                    </div>
-                    <div class="cust-name mb-1">${r.nama}</div>
-                    <div class="small text-muted mb-3">
-                        <i class="fas fa-motorcycle me-1"></i> <strong>${r.no_motor}</strong> 
-                        <span class="mx-2 text-silver">|</span> 
-                        <i class="fas fa-calendar-day me-1"></i> ${r.tgl_sewa}
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                        <div class="price-tag">Rp ${parseInt(r.total || 0).toLocaleString('id-ID')}</div>
-                        <div class="btn-group">
-                            <a href="https://wa.me/${r.no_wa}" class="btn btn-sm btn-outline-success border-0 rounded-circle">
-                                <i class="fab fa-whatsapp fa-lg"></i>
-                            </a>
-                            <button onclick="printInvoice('${r.no_register}')" class="btn btn-sm btn-outline-primary border-0 rounded-circle ms-2">
-                                <i class="fas fa-print fa-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
+                <tr>
+                    <td><div class="fw-bold text-dark">${r.nama}</div><div style="font-size:0.7rem">${r.tgl_sewa}</div></td>
+                    <td><span class="badge bg-light text-dark border">${r.no_motor}</span></td>
+                    <td><span class="badge-status bg-${status}">${status}</span></td>
+                    <td class="fw-bold text-primary text-end">Rp${parseInt(r.total || 0).toLocaleString('id-ID')}</td>
+                </tr>`;
             });
-            document.getElementById('register-list').innerHTML = html || '<div class="text-center py-5 opacity-50"><i class="fas fa-folder-open fa-3x mb-3"></i><br>No Records Found</div>';
+            document.getElementById('register-table-body').innerHTML = html || '<tr><td colspan="4" class="text-center">Kosong</td></tr>';
         }
 
         function openRegForm() {
             document.getElementById('formRegister').reset();
             document.getElementById('f_tgl_sewa').valueAsDate = new Date();
-            
-            let optM = '<option value="" disabled selected>Select Motor</option>';
-            listUnit.filter(u => u.status === 'Available').forEach(u => {
-                optM += `<option value="${u.no_motor}" data-price="${u.harga}">${u.no_motor} - ${u.tipe}</option>`;
-            });
+            let optM = '<option value="" disabled selected>Pilih Motor</option>';
+            listUnit.filter(u => u.status === 'Available').forEach(u => optM += `<option value="${u.no_motor}" data-price="${u.harga}">${u.no_motor}</option>`);
             document.getElementById('f_motor').innerHTML = optM;
-
-            let optC = '<option value="" disabled selected>Select Customer</option>';
-            listCust.forEach(c => {
-                optC += `<option value="${c.nama}" data-wa="${c.no_wa}" data-antar="${c.alamat_antar}" data-jemput="${c.alamat_jemput}">${c.nama}</option>`;
-            });
+            let optC = '<option value="" disabled selected>Pilih Penyewa</option>';
+            listCust.forEach(c => optC += `<option value="${c.nama}" data-wa="${c.no_wa}">${c.nama}</option>`);
             document.getElementById('f_nama').innerHTML = optC;
-            
             modalReg.show();
         }
 
         function autoFillCust() {
             const sel = document.getElementById('f_nama');
-            const opt = sel.options[sel.selectedIndex];
-            document.getElementById('f_wa').value = opt.getAttribute('data-wa') || '';
-            document.getElementById('f_antar').value = opt.getAttribute('data-antar') || '';
-            document.getElementById('f_jemput').value = opt.getAttribute('data-jemput') || '';
+            document.getElementById('f_wa').value = sel.options[sel.selectedIndex].getAttribute('data-wa') || '';
         }
 
         function calcTotal() {
@@ -266,19 +178,11 @@
             const total = price * hari;
             document.getElementById('f_total_disp').innerText = "Rp " + total.toLocaleString('id-ID');
             document.getElementById('f_total_val').value = total;
-            calcSisa();
-        }
-
-        function calcSisa() {
-            const total = document.getElementById('f_total_val').value || 0;
-            const dp = document.getElementById('f_dp').value || 0;
-            document.getElementById('f_sisa_disp').innerText = "Rp " + (total - dp).toLocaleString('id-ID');
         }
 
         document.getElementById('formRegister').onsubmit = function(e) {
             e.preventDefault();
             document.getElementById('loading-overlay').style.display = 'flex';
-            
             const payload = {
                 action: "insert_register",
                 email: userEmail,
@@ -287,34 +191,19 @@
                 wa: document.getElementById('f_wa').value,
                 tgl_sewa: document.getElementById('f_tgl_sewa').value,
                 hari: document.getElementById('f_hari').value,
-                total: document.getElementById('f_total_val').value,
-                antar: document.getElementById('f_antar').value,
-                jemput: document.getElementById('f_jemput').value
+                total: document.getElementById('f_total_val').value
             };
-
             fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
-            .then(r => r.json())
-            .then(res => {
+            .then(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
-                if(res.status === "Success") {
-                    modalReg.hide();
-                    loadRegisters();
-                }
-            })
-            .catch(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-                alert("Cloud Sync Failed!");
+                modalReg.hide();
+                loadRegisters();
             });
         };
 
         function filterReg() {
             let q = document.getElementById('searchReg').value.toLowerCase();
-            renderReg(masterReg.filter(r => r.nama.toLowerCase().includes(q) || r.no_motor.toLowerCase().includes(q)));
-        }
-
-        function printInvoice(id) {
-            alert("Drafting Thermal Invoice for: " + id);
-            // Kakak bisa sambungkan ke script RawBT kita nanti
+            renderTable(masterReg.filter(r => r.nama.toLowerCase().includes(q) || r.no_motor.toLowerCase().includes(q)));
         }
     </script>
 </body>
