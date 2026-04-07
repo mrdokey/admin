@@ -10,58 +10,43 @@
     <style>
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
         .content-area { padding: 20px; }
-        
-        /* Card Style ala AppSheet */
         .unit-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
         .unit-card:active { transform: scale(0.98); background: #f8f9fa; }
         .unit-img { width: 75px; height: 75px; object-fit: cover; border-radius: 10px; margin-right: 15px; background: #f0f0f0; }
         .unit-info { flex-grow: 1; }
         .unit-name { font-weight: 700; color: #566a7f; margin: 0; font-size: 0.9rem; }
-        
-        /* Grouping & Badges */
         .group-header { border-left: 4px solid #696cff; background: rgba(105, 108, 255, 0.05); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 25px; margin-bottom: 10px; }
         .status-available { background: #e8fadf; color: #71dd37; }
         .status-rent { background: #ffe5e5; color: #ff3e1d; }
         .status-booked { background: #fff2e2; color: #fdac41; }
-        
-        /* Form Style */
         .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 4px; text-transform: uppercase; }
-        .form-control { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; color: #566a7f; }
-        .form-control:focus { background-color: #ececf1; box-shadow: none; border: none; }
-        
-        /* Navigation & FAB */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .form-control { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
-        
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #696cff; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); border: none; z-index: 999; }
+        #sync-status { font-size: 0.7rem; font-weight: 600; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay">
-        <div class="spinner-border text-primary mb-2"></div>
-        <p class="small fw-bold">Sinkronisasi Data...</p>
-    </div>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="small fw-bold">Menyimpan Data...</p></div>
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0 text-dark">Daftar Armada</h4>
-            <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="loadUnits()">
-                <i class="fas fa-sync"></i>
-            </button>
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">Daftar Armada</h4>
+                <div id="sync-status" class="text-muted"><i class="fas fa-check-circle text-success"></i> Ready</div>
+            </div>
+            <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="loadUnits(true)"><i class="fas fa-sync"></i></button>
         </div>
         
         <input type="text" id="search" class="form-control mb-2 shadow-sm" placeholder="Cari unit, tipe, atau brand..." onkeyup="filterUnit()">
-        
-        <div id="unit-list">
-            </div>
+        <div id="unit-list"></div>
     </div>
 
-    <button class="fab-add" onclick="openForm(null)">
-        <i class="fas fa-plus fa-lg"></i>
-    </button>
+    <button class="fab-add" onclick="openForm(null)"><i class="fas fa-plus fa-lg"></i></button>
 
     <div class="modal fade" id="modalUnit" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered p-3">
@@ -73,40 +58,34 @@
                 <div class="modal-body p-4">
                     <form id="formUnit">
                         <input type="hidden" id="is_edit_mode" value="false">
-                        
                         <div class="mb-3">
                             <label class="form-label">No Plat / No Motor*</label>
                             <input type="text" class="form-control" id="u_plat" placeholder="DK 1234 AB" required>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Tipe Motor</label>
                             <input type="text" class="form-control" id="u_tipe" placeholder="Contoh: Nmax">
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Brand</label>
                             <input type="text" class="form-control" id="u_brand" placeholder="Contoh: Yamaha">
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Harga Sewa / Hari*</label>
                             <input type="number" class="form-control" id="u_harga" placeholder="150000" required>
                         </div>
-
                         <div class="mb-4">
                             <label class="form-label d-block">Foto Unit</label>
                             <div class="text-center p-4 border rounded-3 bg-light" style="border-style: dashed !important; position: relative; min-height: 120px;">
                                 <img id="u_preview" src="" class="img-fluid rounded shadow-sm mb-2" style="max-height: 160px; display: none;">
                                 <div id="u_placeholder">
                                     <i class="fas fa-camera fa-2x text-muted mb-2"></i><br>
-                                    <small class="text-muted">Klik untuk Ambil/Upload Foto</small>
+                                    <small class="text-muted">Klik untuk Upload Foto</small>
                                 </div>
                                 <input type="file" id="u_file" accept="image/*" class="opacity-0 position-absolute w-100 h-100 top-0 start-0" style="cursor: pointer;">
                                 <input type="hidden" id="u_foto_url">
                             </div>
                         </div>
-
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-light w-100 fw-bold py-2 rounded-pill" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow">Simpan</button>
@@ -126,7 +105,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Gunakan URL deployment terbaru Kakak
         const webAppUrl = "https://script.google.com/macros/s/AKfycbz2bTvtEEJq_UjNxzMBYjIExJOdvoLiamvyJj19DqN9UA-ZzYuJu6GW6qx3BCvXbI_5pA/exec";
         const userEmail = localStorage.getItem('ams_user_email');
         let masterUnits = [];
@@ -135,31 +113,26 @@
         window.onload = function() {
             if (!userEmail) { window.location.href = "index.html"; return; }
             modalCtrl = new bootstrap.Modal(document.getElementById('modalUnit'));
+            const cached = localStorage.getItem('ams_last_units');
+            if (cached) { masterUnits = JSON.parse(cached); renderUnits(masterUnits); }
             loadUnits();
         };
 
-        function loadUnits() {
-            document.getElementById('loading-overlay').style.display = 'flex';
+        function loadUnits(force = false) {
+            const statusLabel = document.getElementById('sync-status');
+            statusLabel.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Syncing...`;
             fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
             .then(r => r.json())
             .then(data => {
                 masterUnits = data.units || [];
+                localStorage.setItem('ams_last_units', JSON.stringify(masterUnits));
                 renderUnits(masterUnits);
-                document.getElementById('loading-overlay').style.display = 'none';
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('loading-overlay').style.display = 'none';
+                statusLabel.innerHTML = `<i class="fas fa-check-circle text-success"></i> Ready`;
             });
         }
 
         function renderUnits(units) {
-            const groups = {
-                'Rent': units.filter(u => u.status === 'Rent'),
-                'Booked': units.filter(u => u.status === 'Booked'),
-                'Available': units.filter(u => u.status === 'Available')
-            };
-
+            const groups = { 'Rent': units.filter(u => u.status === 'Rent'), 'Booked': units.filter(u => u.status === 'Booked'), 'Available': units.filter(u => u.status === 'Available') };
             let html = "";
             for (const [status, data] of Object.entries(groups)) {
                 if (data.length > 0) {
@@ -168,7 +141,6 @@
                             <span class="fw-bold text-dark text-uppercase" style="font-size: 0.75rem;">${status}</span>
                             <span class="badge rounded-pill ${sClass}" style="font-size: 0.7rem;">${data.length} Unit</span>
                         </div>`;
-
                     data.forEach(u => {
                         html += `<div class="unit-card" onclick="openForm('${u.no_motor}')">
                             <img src="${u.foto_link}" class="unit-img" onerror="this.src='https://via.placeholder.com/80'">
@@ -184,19 +156,17 @@
                     });
                 }
             }
-            document.getElementById('unit-list').innerHTML = html || '<p class="text-center mt-5">Belum ada data armada.</p>';
+            document.getElementById('unit-list').innerHTML = html || '<p class="text-center mt-5">Belum ada armada.</p>';
         }
 
         function openForm(noPlat) {
-            const form = document.getElementById('formUnit');
-            form.reset();
+            document.getElementById('formUnit').reset();
             document.getElementById('u_preview').style.display = 'none';
             document.getElementById('u_placeholder').style.display = 'block';
             document.getElementById('u_foto_url').value = "";
-
             if (noPlat) {
                 const u = masterUnits.find(item => item.no_motor === noPlat);
-                document.getElementById('modalTitle').innerText = "Edit Item";
+                document.getElementById('modalTitle').innerText = "Edit Unit";
                 document.getElementById('is_edit_mode').value = "true";
                 document.getElementById('u_plat').value = u.no_motor;
                 document.getElementById('u_plat').readOnly = true;
@@ -234,10 +204,8 @@
         document.getElementById('formUnit').onsubmit = function(e) {
             e.preventDefault();
             document.getElementById('loading-overlay').style.display = 'flex';
-            
-            const isEdit = document.getElementById('is_edit_mode').value === "true";
             const payload = {
-                action: isEdit ? "update_item" : "insert_item",
+                action: document.getElementById('is_edit_mode').value === "true" ? "update_item" : "insert_item",
                 email: userEmail,
                 no_motor: document.getElementById('u_plat').value,
                 tipe: document.getElementById('u_tipe').value,
@@ -245,29 +213,18 @@
                 harga: document.getElementById('u_harga').value,
                 foto: document.getElementById('u_foto_url').value
             };
-
-            fetch(webAppUrl, { 
-                method: "POST", 
-                body: JSON.stringify(payload) 
-            })
-            .then(res => res.json())
-            .then(res => {
+            fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
+            .then(r => r.json())
+            .then(() => {
                 modalCtrl.hide();
                 loadUnits();
-            })
-            .catch(err => {
-                alert("Gagal menyimpan data!");
                 document.getElementById('loading-overlay').style.display = 'none';
             });
         };
 
         function filterUnit() {
             let q = document.getElementById('search').value.toLowerCase();
-            let filtered = masterUnits.filter(u => 
-                u.no_motor.toLowerCase().includes(q) || 
-                u.tipe.toLowerCase().includes(q) || 
-                u.brand.toLowerCase().includes(q)
-            );
+            let filtered = masterUnits.filter(u => u.no_motor.toLowerCase().includes(q) || u.tipe.toLowerCase().includes(q) || u.brand.toLowerCase().includes(q));
             renderUnits(filtered);
         }
     </script>
