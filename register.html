@@ -3,178 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMS RIDE | Register Form</title>
+    <title>AMS RIDE | Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f5f5f9; padding-bottom: 80px; font-family: sans-serif; }
-        .form-section { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .form-label { font-size: 0.8rem; font-weight: 700; color: #566a7f; margin-bottom: 5px; }
-        .form-control, .form-select { border: 1px solid #d9dee3; padding: 10px; border-radius: 8px; }
-        .sticky-header { position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #eee; padding: 15px; }
-        .btn-save { background: #696cff; color: #fff; border-radius: 20px; padding: 10px 30px; border: none; font-weight: 600; }
-        .total-highlight { background: #f0f0ff; border: 1px dashed #696cff; color: #696cff; font-weight: bold; }
+        body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
+        .content-area { padding: 20px; }
+        .reg-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); position: relative; border-left: 5px solid #696cff; }
+        .status-booked { border-left-color: #fdac41; }
+        .status-rent { border-left-color: #ff3e1d; }
+        .status-back { border-left-color: #71dd37; }
+        
+        .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 4px; text-transform: uppercase; }
+        .form-control, .form-select { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
+        .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
+        .nav-item.active { color: #696cff; }
+        .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
+        
+        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #696cff; color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="small fw-bold">Menyimpan Transaksi...</p></div>
 
-<div class="sticky-header d-flex justify-content-between align-items-center">
-    <a href="index.html" class="text-dark"><i class="fas fa-arrow-left"></i></a>
-    <h6 class="mb-0 fw-bold">Register Form</h6>
-    <div></div>
-</div>
-
-<div class="container mt-3">
-    <form id="formRegister">
-        <div class="form-section">
-            <div class="mb-3">
-                <label class="form-label">No Motor*</label>
-                <select class="form-select" id="reg_motor" required onchange="calcTotal()"></select>
+    <div class="content-area">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">Data Register</h4>
+                <div id="sync-status" class="text-muted" style="font-size: 0.7rem;"><i class="fas fa-check-circle text-success"></i> Ready</div>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Penyewa (Ref Customer)*</label>
-                <select class="form-select" id="reg_nama" required onchange="autoFillCustomer()"></select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">No WA</label>
-                <input type="text" class="form-control" id="reg_wa" readonly style="background:#f9f9f9;">
-            </div>
+            <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="loadRegisters(true)"><i class="fas fa-sync"></i></button>
         </div>
-
-        <div class="form-section">
-            <div class="row">
-                <div class="col-6 mb-3">
-                    <label class="form-label">Tgl Mulai Sewa</label>
-                    <input type="datetime-local" class="form-control" id="reg_mulai" required onchange="calcTotal()">
-                </div>
-                <div class="col-6 mb-3">
-                    <label class="form-label">Tgl Selesai Sewa</label>
-                    <input type="datetime-local" class="form-control" id="reg_selesai" required onchange="calcTotal()">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-6 mb-3">
-                    <label class="form-label">Jumlah Hari</label>
-                    <input type="number" class="form-control" id="reg_hari" value="1" min="1" oninput="calcTotal()">
-                </div>
-                <div class="col-6 mb-3">
-                    <label class="form-label">Jumlah Helm</label>
-                    <input type="number" class="form-control" id="reg_helm" value="2">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="mb-3">
-                <label class="form-label">Harga Sewa / Hari</label>
-                <input type="text" class="form-control" id="reg_harga_display" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Total Harga Sewa</label>
-                <input type="text" class="form-control total-highlight" id="reg_total_display" readonly>
-            </div>
-            <div class="row">
-                <div class="col-6 mb-3">
-                    <label class="form-label">Pembayaran DP</label>
-                    <input type="number" class="form-control" id="reg_dp" value="0" oninput="calcSisa()">
-                </div>
-                <div class="col-6 mb-3">
-                    <label class="form-label">Total Tagihan (Sisa)</label>
-                    <input type="text" class="form-control text-danger fw-bold" id="reg_sisa_display" readonly>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="mb-3">
-                <label class="form-label">Alamat Antar</label>
-                <input type="text" class="form-control" id="reg_antar">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Alamat Jemput</label>
-                <input type="text" class="form-control" id="reg_jemput">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Status</label>
-                <select class="form-select" id="reg_status">
-                    <option value="Booked">Booked</option>
-                    <option value="Rent">Rent</option>
-                    <option value="Back">Back</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between p-2">
-            <button type="button" class="btn btn-light rounded-pill px-4" onclick="history.back()">Cancel</button>
-            <button type="submit" class="btn-save">Save Transaction</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    const webAppUrl = "URL_GAS_KAKAK";
-    const userEmail = localStorage.getItem('ams_user_email');
-    let listCustomer = [];
-    let listArmada = [];
-
-    window.onload = function() {
-        loadDropdownData();
-    };
-
-    function loadDropdownData() {
-        // Ambil data dari cache biar cepet
-        listCustomer = JSON.parse(localStorage.getItem('ams_last_customers') || "[]");
-        listArmada = JSON.parse(localStorage.getItem('ams_last_units') || "[]");
-
-        // Isi Dropdown Motor
-        let optMotor = '<option value="">-- Pilih Motor --</option>';
-        listArmada.forEach(m => {
-            if(m.status === 'Available') optMotor += `<option value="${m.no_motor}" data-price="${m.harga}">${m.no_motor} - ${m.tipe}</option>`;
-        });
-        document.getElementById('reg_motor').innerHTML = optMotor;
-
-        // Isi Dropdown Customer (Reference)
-        let optCust = '<option value="">-- Pilih Penyewa --</option>';
-        listCustomer.forEach(c => {
-            optCust += `<option value="${c.nama}" data-wa="${c.no_wa}" data-antar="${c.alamat_antar}" data-jemput="${c.alamat_jemput}">${c.nama}</option>`;
-        });
-        document.getElementById('reg_nama').innerHTML = optCust;
-    }
-
-    function autoFillCustomer() {
-        const sel = document.getElementById('reg_nama');
-        const opt = sel.options[sel.selectedIndex];
-        document.getElementById('reg_wa').value = opt.getAttribute('data-wa') || '';
-        document.getElementById('reg_antar').value = opt.getAttribute('data-antar') || '';
-        document.getElementById('reg_jemput').value = opt.getAttribute('data-jemput') || '';
-    }
-
-    function calcTotal() {
-        const motorSel = document.getElementById('reg_motor');
-        const price = motorSel.options[motorSel.selectedIndex]?.getAttribute('data-price') || 0;
-        const days = document.getElementById('reg_hari').value || 1;
         
-        const total = price * days;
-        document.getElementById('reg_harga_display').value = "Rp " + parseInt(price).toLocaleString('id-ID');
-        document.getElementById('reg_total_display').value = "Rp " + total.toLocaleString('id-ID');
-        
-        calcSisa();
-    }
+        <input type="text" id="searchReg" class="form-control mb-3 shadow-sm border-0" placeholder="Cari penyewa..." onkeyup="filterReg()" style="background:#fff;">
+        <div id="register-list"></div>
+    </div>
 
-    function calcSisa() {
-        const totalStr = document.getElementById('reg_total_display').value.replace(/\D/g, '');
-        const dp = document.getElementById('reg_dp').value || 0;
-        const sisa = totalStr - dp;
-        document.getElementById('reg_sisa_display').value = "Rp " + sisa.toLocaleString('id-ID');
-    }
+    <button class="fab-add" onclick="openRegForm()"><i class="fas fa-plus fa-lg"></i></button>
 
-    document.getElementById('formRegister').onsubmit = function(e) {
-        e.preventDefault();
-        // Logic hit fetch POST action "insert_register" ke GAS...
-        alert("Transaksi Sedang Disimpan...");
-    };
-</script>
+    <div class="modal fade" id="modalReg" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header border-0 shadow-sm">
+                    <h5 class="fw-bold mb-0">Input Sewa Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formRegister">
+                        <div class="mb-3">
+                            <label class="form-label">No Motor*</label>
+                            <select class="form-select" id="f_motor" required onchange="calcTotal()"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Penyewa* (Ref Customer)</label>
+                            <select class="form-select" id="f_nama" required onchange="autoFillCust()"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">No WA</label>
+                            <input type="text" class="form-control" id="f_wa" readonly>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3"><label class="form-label">Tgl Sewa</label><input type="date" class="form-control" id="f_tgl_sewa" required onchange="calcTotal()"></div>
+                            <div class="col-6 mb-3"><label class="form-label">Durasi (Hari)</label><input type="number" class="form-control" id="f_hari" value="1" min="1" oninput="calcTotal()"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3"><label class="form-label">Jml Helm</label><input type="number" class="form-control" id="f_helm" value="2"></div>
+                            <div class="col-6 mb-3"><label class="form-label">DP (Bayar)</label><input type="number" class="form-control" id="f_dp" value="0" oninput="calcSisa()"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Harga</label>
+                            <input type="text" class="form-control fw-bold text-primary" id="f_total_disp" readonly>
+                            <input type="hidden" id="f_total_val">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sisa Tagihan</label>
+                            <input type="text" class="form-control text-danger fw-bold" id="f_sisa_disp" readonly>
+                        </div>
+                        <div class="mb-3"><label class="form-label">Alamat Antar</label><input type="text" class="form-control" id="f_antar"></div>
+                        <div class="mb-3"><label class="form-label">Alamat Jemput</label><input type="text" class="form-control" id="f_jemput"></div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-pill mt-3 shadow">SIMPAN REGISTER</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="item.html" class="nav-item"><i class="fas fa-th-list"></i>Armada</a>
+        <a href="register.html" class="nav-item active"><i class="fas fa-calendar-check"></i>Register</a>
+        <a href="customer.html" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const webAppUrl = "URL_GAS_KAKAK";
+        const userEmail = localStorage.getItem('ams_user_email');
+        let masterReg = [], listCust = [], listUnit = [];
+        let modalReg;
+
+        window.onload = function() {
+            modalReg = new bootstrap.Modal(document.getElementById('modalReg'));
+            loadRegisters();
+        };
+
+        function loadRegisters() {
+            fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
+            .then(r => r.json()).then(data => {
+                masterReg = data.registers || [];
+                listCust = data.customers || [];
+                listUnit = data.units || [];
+                renderReg(masterReg);
+                // Simpan cache untuk offline-feel
+                localStorage.setItem('ams_last_customers', JSON.stringify(listCust));
+                localStorage.setItem('ams_last_units', JSON.stringify(listUnit));
+            });
+        }
+
+        function renderReg(data) {
+            let html = "";
+            data.forEach(r => {
+                let sClass = r.status === 'Booked' ? 'status-booked' : (r.status === 'Rent' ? 'status-rent' : 'status-back');
+                html += `<div class="reg-card ${sClass}">
+                    <div class="d-flex justify-content-between">
+                        <small class="fw-bold text-muted">${r.no_register}</small>
+                        <span class="badge bg-light text-dark" style="font-size:0.6rem">${r.status}</span>
+                    </div>
+                    <div class="fw-bold mt-1">${r.nama}</div>
+                    <div class="small text-muted">${r.no_motor} • ${r.tgl_sewa}</div>
+                    <div class="text-primary fw-bold mt-1">Rp ${parseInt(r.total).toLocaleString('id-ID')}</div>
+                </div>`;
+            });
+            document.getElementById('register-list').innerHTML = html || '<p class="text-center mt-5">Kosong.</p>';
+        }
+
+        function openRegForm() {
+            document.getElementById('formRegister').reset();
+            // Isi Dropdown Motor
+            let optM = '<option value="">-- Pilih Motor --</option>';
+            listUnit.filter(u => u.status === 'Available').forEach(u => {
+                optM += `<option value="${u.no_motor}" data-price="${u.harga}">${u.no_motor} - ${u.tipe}</option>`;
+            });
+            document.getElementById('f_motor').innerHTML = optM;
+            // Isi Dropdown Cust
+            let optC = '<option value="">-- Pilih Customer --</option>';
+            listCust.forEach(c => {
+                optC += `<option value="${c.nama}" data-wa="${c.no_wa}" data-antar="${c.alamat_antar}" data-jemput="${c.alamat_jemput}">${c.nama}</option>`;
+            });
+            document.getElementById('f_nama').innerHTML = optC;
+            modalReg.show();
+        }
+
+        function autoFillCust() {
+            const sel = document.getElementById('f_nama');
+            const opt = sel.options[sel.selectedIndex];
+            document.getElementById('f_wa').value = opt.getAttribute('data-wa') || '';
+            document.getElementById('f_antar').value = opt.getAttribute('data-antar') || '';
+            document.getElementById('f_jemput').value = opt.getAttribute('data-jemput') || '';
+        }
+
+        function calcTotal() {
+            const m = document.getElementById('f_motor');
+            const price = m.options[m.selectedIndex]?.getAttribute('data-price') || 0;
+            const hari = document.getElementById('f_hari').value || 1;
+            const total = price * hari;
+            document.getElementById('f_total_disp').value = "Rp " + total.toLocaleString('id-ID');
+            document.getElementById('f_total_val').value = total;
+            calcSisa();
+        }
+
+        function calcSisa() {
+            const total = document.getElementById('f_total_val').value || 0;
+            const dp = document.getElementById('f_dp').value || 0;
+            document.getElementById('f_sisa_disp').value = "Rp " + (total - dp).toLocaleString('id-ID');
+        }
+
+        document.getElementById('formRegister').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('loading-overlay').style.display = 'flex';
+            const payload = {
+                action: "insert_register",
+                email: userEmail,
+                no_motor: document.getElementById('f_motor').value,
+                nama: document.getElementById('f_nama').value,
+                wa: document.getElementById('f_wa').value,
+                tgl_sewa: document.getElementById('f_tgl_sewa').value,
+                hari: document.getElementById('f_hari').value,
+                total: document.getElementById('f_total_val').value,
+                antar: document.getElementById('f_antar').value,
+                jemput: document.getElementById('f_jemput').value
+            };
+            fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
+            .then(r => r.json()).then(() => {
+                modalReg.hide();
+                loadRegisters();
+                document.getElementById('loading-overlay').style.display = 'none';
+            });
+        };
+    </script>
 </body>
 </html>
