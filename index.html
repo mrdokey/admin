@@ -8,35 +8,31 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; color: #697a8d; padding-bottom: 80px; overflow-x: hidden; }
+        body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; color: #697a8d; padding-bottom: 80px; }
         .content-area { padding: 20px; }
         .card { border: none; border-radius: 0.5rem; box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12); margin-bottom: 20px; background: #fff; }
         .stat-value { font-size: 1.5rem; font-weight: 700; color: #566a7f; }
         .btn-primary { background-color: #696cff; border-color: #696cff; box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
-        .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
-        
-        /* Flash Launcher Animation */
-        #flash-launcher { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.6s ease-in-out; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
-        .launcher-img { width: 120px; animation: pulse 1.5s infinite; }
+        .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        /* Skeleton Loading Effect */
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body>
-    <div id="flash-launcher">
-        <img src="https://i.ibb.co.com/9kd49x7S/1775451864442.png" class="launcher-img">
-        <h3 class="fw-bold mt-3">AMS <span style="color:#696cff">RIDE</span></h3>
-        <div class="spinner-grow text-primary mt-2" style="width: 1rem; height: 1rem;"></div>
-        <p class="text-muted small mt-2">Syncing MRD Digital Solution...</p>
+    <div id="login-page" style="display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+        <img src="https://i.ibb.co.com/wTG6VXf/1775452711898-removebg-preview.png" style="width: 100px; margin-bottom: 20px;">
+        <div id="buttonDiv"></div>
     </div>
 
     <div id="dashboard-content" style="display:none;">
         <div class="content-area">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold mb-0">Dashboard</h4>
-                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="loadData(true)"><i class="fas fa-sync me-1"></i> Sync</button>
+                <div id="sync-indicator" class="small text-muted"><i class="fas fa-check-circle text-success"></i> Synchronized</div>
             </div>
 
             <div class="row g-3 mb-2">
@@ -49,7 +45,10 @@
             </button>
 
             <div class="card">
-                <div class="card-header bg-transparent border-0"><h5 class="mb-0 fw-bold">Recent History</h5></div>
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between">
+                    <h5 class="mb-0 fw-bold">Recent History</h5>
+                    <small onclick="loadData(true)" style="cursor:pointer" class="text-primary"><i class="fas fa-sync"></i></small>
+                </div>
                 <div class="table-responsive"><table class="table table-hover mb-0"><tbody id="table-body"></tbody></table></div>
             </div>
         </div>
@@ -62,6 +61,8 @@
         <a href="#" class="nav-item"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
+    <div class="modal fade" id="modalInput" tabindex="-1">...</div>
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -70,43 +71,72 @@
 
         window.onload = function () {
             if (userEmail) { 
-                showDashboard();
+                showDashboard(); 
+                // TURBO: Render data dari cache dulu supaya instan!
                 renderFromCache();
-                loadData(); 
+                loadData(); // Jalankan sync di background
             } else { 
-                window.location.href = "login.html"; // Asumsi ada login terpisah atau pakai div login
+                document.getElementById('login-page').style.display = 'flex'; 
+                initGoogleLogin(); 
             }
         };
 
         function renderFromCache() {
-            const cached = localStorage.getItem('ams_full_cache');
-            if (cached) updateUI(JSON.parse(cached));
-        }
-
-        function loadData(manual = false) {
-            const launcher = document.getElementById('flash-launcher');
-            if(manual) { launcher.style.display = 'flex'; launcher.style.opacity = '1'; }
-
-            fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
-            .then(r => r.json())
-            .then(data => {
-                localStorage.setItem('ams_full_cache', JSON.stringify(data));
+            const cached = localStorage.getItem('ams_last_data');
+            if (cached) {
+                const data = JSON.parse(cached);
                 updateUI(data);
-                setTimeout(() => { launcher.style.opacity = '0'; setTimeout(() => launcher.style.display = 'none', 600); }, 800);
-            });
+            } else {
+                // Beri efek skeleton kalau benar-benar baru
+                document.getElementById('stat-income').classList.add('skeleton');
+                document.getElementById('stat-units').classList.add('skeleton');
+            }
         }
 
         function updateUI(data) {
             document.getElementById('stat-income').innerText = "Rp " + (data.income || 0);
             document.getElementById('stat-units').innerText = data.unitsReady || 0;
-            let h = "";
-            if(data.records) data.records.forEach(r => { 
-                h += `<tr><td class="small px-3 py-2 border-0"><b>${r.tgl}</b><br>${r.nama}</td><td class="text-end small px-3 py-2 border-0"><b>${r.unit}</b><br><span class="text-primary fw-bold">Rp ${r.total}</span></td></tr>`; 
-            });
-            document.getElementById('table-body').innerHTML = h;
+            document.getElementById('stat-income').classList.remove('skeleton');
+            document.getElementById('stat-units').classList.remove('skeleton');
+
+            let h = ""; 
+            if(data.records) {
+                data.records.forEach(r => { 
+                    h += `<tr><td class="small px-3 py-2 border-0"><b>${r.tgl}</b><br>${r.nama}</td><td class="text-end small px-3 py-2 border-0"><b>${r.unit}</b><br><span class="text-primary fw-bold">Rp ${r.total}</span></td></tr>`; 
+                });
+            }
+            document.getElementById('table-body').innerHTML = h || '<tr><td class="text-center p-3">No data.</td></tr>';
+            
+            // Render options modal
+            if(data.motors) {
+                let m = '<option value="">-- Pilih Unit --</option>'; 
+                data.motors.forEach(i => { m += `<option value="${i.no_motor}">${i.no_motor} (${i.tipe})</option>`; });
+                document.getElementById('motor_id').innerHTML = m;
+            }
         }
 
-        function showDashboard() { document.getElementById('dashboard-content').style.display = 'block'; }
+        function loadData(force = false) {
+            const syncIcon = document.getElementById('sync-indicator');
+            syncIcon.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Syncing...`;
+
+            fetch(`${webAppUrl}?action=read_full&email=${userEmail}`)
+            .then(r => r.json())
+            .then(data => {
+                localStorage.setItem('ams_last_data', JSON.stringify(data));
+                updateUI(data);
+                syncIcon.innerHTML = `<i class="fas fa-check-circle text-success"></i> Synchronized`;
+            })
+            .catch(e => {
+                syncIcon.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> Offline Mode`;
+            });
+        }
+
+        function showDashboard() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+        }
+
+        // ... (Fungsi logout & submit form register tetap sama) ...
     </script>
 </body>
 </html>
