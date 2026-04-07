@@ -10,49 +10,87 @@
     <style>
         body { font-family: 'Public Sans', sans-serif; background-color: #f5f5f9; padding-bottom: 90px; }
         .content-area { padding: 20px; }
-        .customer-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; }
+        /* Card Klik-able */
+        .customer-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+        .customer-card:active { transform: scale(0.98); background: #f8f9fa; }
+        
         .cust-icon { width: 45px; height: 45px; background: rgba(105, 108, 255, 0.1); color: #696cff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-right: 15px; }
         .cust-info { flex-grow: 1; }
-        .btn-wa { background-color: #25D366; color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .btn-wa { background-color: #25D366; color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 5; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #e7e7ff; z-index: 1000; }
         .nav-item { text-align: center; color: #a1acb8; text-decoration: none; font-size: 0.7rem; font-weight: 600; }
         .nav-item.active { color: #696cff; }
         .nav-item i { font-size: 1.25rem; display: block; margin-bottom: 3px; }
+        
+        .fab-add { position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: #696cff; color: white; border: none; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.4); display: flex; align-items: center; justify-content: center; z-index: 999; }
+        
+        .form-label { font-size: 0.75rem; font-weight: 700; color: #a1acb8; margin-bottom: 4px; text-transform: uppercase; }
+        .form-control { border: none; background-color: #f5f5f9; padding: 10px 15px; border-radius: 8px; font-size: 0.9rem; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Memuat Data Pelanggan...</p></div>
+    <div id="loading-overlay"><div class="spinner-border text-primary mb-2"></div><p class="fw-bold">Sinkronisasi...</p></div>
 
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0 text-dark">Data Customer</h4>
-            <button class="btn btn-sm btn-light border rounded-pill" onclick="loadCustomers()"><i class="fas fa-sync"></i></button>
+            <button class="btn btn-sm btn-light border rounded-pill" onclick="loadCustomers()"><i class="fas fa-sync text-primary"></i></button>
         </div>
         
-        <div class="input-group mb-3 shadow-sm">
-            <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
-            <input type="text" id="searchCust" class="form-control border-0" placeholder="Cari nama atau nomor..." onkeyup="filterCustomer()">
-        </div>
+        <input type="text" id="searchCust" class="form-control mb-3 shadow-sm border-0" placeholder="Cari nama atau nomor..." onkeyup="filterCustomer()" style="background:#fff; padding:12px;">
 
-        <div id="customer-list">
+        <div id="customer-list"></div>
+    </div>
+
+    <button class="fab-add" onclick="openForm(null)"><i class="fas fa-user-plus fa-lg"></i></button>
+
+    <div class="modal fade" id="modalCustomer" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered p-3">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold text-dark mb-4" id="modalTitle">Tambah Customer</h5>
+                    <form id="formCustomer">
+                        <input type="hidden" id="is_edit_mode" value="false">
+                        <input type="hidden" id="old_wa"> <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="c_nama" placeholder="Sesuai KTP" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nomor WhatsApp</label>
+                            <input type="tel" class="form-control" id="c_wa" placeholder="08xxx" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Alamat Antar / Jemput</label>
+                            <textarea class="form-control" id="c_alamat" rows="2" placeholder="Detail Alamat Lengkap"></textarea>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light w-100 fw-bold py-2 rounded-pill" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow">Simpan</button>
+                        </div>
+                    </form>
+                </div>
             </div>
+        </div>
     </div>
 
     <div class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
         <a href="item.html" class="nav-item"><i class="fas fa-th-list"></i>Armada</a>
-        <a href="#" class="nav-item"><i class="fas fa-wallet"></i>Cashflow</a>
+        <a href="cashflow.html" class="nav-item"><i class="fas fa-wallet"></i>Cashflow</a>
         <a href="customer.html" class="nav-item active"><i class="fas fa-user-friends"></i>Customer</a>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const webAppUrl = "https://script.google.com/macros/s/AKfycbz2bTvtEEJq_UjNxzMBYjIExJOdvoLiamvyJj19DqN9UA-ZzYuJu6GW6qx3BCvXbI_5pA/exec";
         const userEmail = localStorage.getItem('ams_user_email');
         let masterCustomers = [];
+        let modalCtrl;
 
         window.onload = function() {
-            if (!userEmail) { window.location.href = "login.html"; return; }
+            modalCtrl = new bootstrap.Modal(document.getElementById('modalCustomer'));
             loadCustomers();
         };
 
@@ -64,46 +102,66 @@
                 masterCustomers = data.customers || [];
                 renderCustomers(masterCustomers);
                 document.getElementById('loading-overlay').style.display = 'none';
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById('loading-overlay').style.display = 'none';
             });
         }
 
         function renderCustomers(data) {
             let html = "";
-            if (data.length === 0) {
-                html = '<div class="text-center p-5 text-muted">Belum ada data customer.</div>';
-            } else {
-                data.forEach(c => {
-                    // Bersihkan nomor WA untuk link (hilangkan karakter selain angka)
-                    const cleanWA = c.no_wa.replace(/\D/g, '');
-                    html += `
-                    <div class="customer-card">
-                        <div class="cust-icon"><i class="fas fa-user"></i></div>
-                        <div class="cust-info">
-                            <div class="fw-bold text-dark">${c.nama}</div>
-                            <div class="small text-muted">${c.no_wa}</div>
-                            <div class="small text-muted" style="font-size: 0.7rem;"><i class="fas fa-map-marker-alt me-1"></i> ${c.alamat_antar || '-'}</div>
-                        </div>
-                        <a href="https://wa.me/${cleanWA}" class="btn-wa" target="_blank">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
-                    </div>`;
-                });
-            }
-            document.getElementById('customer-list').innerHTML = html;
+            data.forEach(c => {
+                const cleanWA = c.no_wa.toString().replace(/\D/g, '');
+                html += `
+                <div class="customer-card" onclick="openForm('${c.no_wa}')">
+                    <div class="cust-icon"><i class="fas fa-user"></i></div>
+                    <div class="cust-info">
+                        <div class="fw-bold text-dark">${c.nama}</div>
+                        <div class="small text-muted">${c.no_wa}</div>
+                        <div class="small text-muted" style="font-size: 0.7rem;"><i class="fas fa-map-marker-alt me-1"></i> ${c.alamat_antar || '-'}</div>
+                    </div>
+                    <a href="https://wa.me/${cleanWA}" class="btn-wa" onclick="event.stopPropagation();">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>`;
+            });
+            document.getElementById('customer-list').innerHTML = html || '<p class="text-center mt-5">Belum ada customer.</p>';
         }
 
-        function filterCustomer() {
-            let q = document.getElementById('searchCust').value.toLowerCase();
-            const filtered = masterCustomers.filter(c => 
-                c.nama.toLowerCase().includes(q) || 
-                c.no_wa.toLowerCase().includes(q)
-            );
-            renderCustomers(filtered);
+        function openForm(waKey) {
+            document.getElementById('formCustomer').reset();
+            if (waKey) {
+                const c = masterCustomers.find(item => item.no_wa == waKey);
+                document.getElementById('modalTitle').innerText = "Edit Customer";
+                document.getElementById('is_edit_mode').value = "true";
+                document.getElementById('old_wa').value = c.no_wa;
+                document.getElementById('c_nama').value = c.nama;
+                document.getElementById('c_wa').value = c.no_wa;
+                document.getElementById('c_alamat').value = c.alamat_antar;
+            } else {
+                document.getElementById('modalTitle').innerText = "Tambah Customer";
+                document.getElementById('is_edit_mode').value = "false";
+            }
+            modalCtrl.show();
         }
-    </script>
-</body>
-</html>
+
+        document.getElementById('formCustomer').onsubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            const isEdit = document.getElementById('is_edit_mode').value === "true";
+            const payload = {
+                action: isEdit ? "update_customer" : "insert_customer",
+                email: userEmail,
+                nama: document.getElementById('c_nama').value,
+                wa: document.getElementById('c_wa').value,
+                old_wa: document.getElementById('old_wa').value,
+                alamat: document.getElementById('c_alamat').value
+            };
+
+            fetch(webAppUrl, { method: "POST", body: JSON.stringify(payload) })
+            .then(() => {
+                modalCtrl.hide();
+                loadCustomers();
+            });
+        };
+
+        function filterCustomer() {
+            let q = document.getElementById('
